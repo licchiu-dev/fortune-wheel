@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--color-yellow: rgb(255, 237, 0);
+	--color-red: rgb(226, 0, 26);
+	--color-brown: #dabd94;
+	--color-blue: rgb(0, 91, 129);
+}
+
+body {
+	background-color: #121212;
+}
+
+@theme {
+	--color-yellow: var(--color-yellow);
+	--color-red: var(--color-red);
+	--color-brown: var(--color-brown);
+	--color-blue: var(--color-blue);
+}
+
+/* Animazioni per la modale di celebrazione */
+@keyframes confetti-fall {
+	0% {
+		transform: translateY(0) translateX(0) rotate(0deg);
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(var(--speed-y)) translateX(var(--speed-x))
+			rotate(var(--rotation-speed));
+		opacity: 0;
+	}
+}
+
+@keyframes modal-bounce {
+	0% {
+		transform: scale(0.3) rotate(-10deg);
+		opacity: 0;
+	}
+	50% {
+		transform: scale(1.05) rotate(2deg);
+	}
+	70% {
+		transform: scale(0.95) rotate(-1deg);
+	}
+	100% {
+		transform: scale(1) rotate(0deg);
+		opacity: 1;
+	}
+}
+
+@keyframes number-pop {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	25% {
+		transform: scale(1.1) rotate(5deg);
+	}
+	75% {
+		transform: scale(1.1) rotate(-5deg);
+	}
+}
+
+.animate-modal-bounce {
+	animation: modal-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.animate-number-pop {
+	animation: number-pop 1s ease-in-out infinite;
+}
