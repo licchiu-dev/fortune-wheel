@@ -8,6 +8,13 @@ export const getRandomNumber = (min: number, max: number): number => {
 };
 
 /**
+ * Genera una sequenza di `count` numeri consecutivi a partire da `start`
+ */
+export const generateSequentialNumbers = (count: number, start: number): number[] => {
+  return Array.from({ length: count }, (_, i) => i + start);
+};
+
+/**
  * Genera colori per gli spicchi della ruota
  */
 export const generateWheelColors = (count: number): string[] => {

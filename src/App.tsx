@@ -2,12 +2,24 @@ import { useState } from 'react';
 import { FortuneWheel } from './components/FortuneWheel';
 import { CelebrationModal } from './components/CelebrationModal';
 import { useFortuneWheel } from './hooks';
+import { generateSequentialNumbers } from './utils';
+
+type ConfigMode = 'slices' | 'range';
 
 function App() {
 	// Configurazione iniziale
 	const [isConfigured, setIsConfigured] = useState(false);
+	const [configMode, setConfigMode] = useState<ConfigMode>('slices');
 	const [totalSlices, setTotalSlices] = useState(100);
+	const [minNumber, setMinNumber] = useState(1);
+	const [maxNumber, setMaxNumber] = useState(100);
 	const [totalExtractions, setTotalExtractions] = useState(10);
+
+	// Numero di spicchi risultante dalla modalità corrente
+	const effectiveSliceCount =
+		configMode === 'slices'
+			? totalSlices
+			: Math.max(0, maxNumber - minNumber + 1);
 
 	// Numeri disponibili e estratti
 	const [availableNumbers, setAvailableNumbers] = useState<number[]>([]);
@@ -31,17 +43,26 @@ function App() {
 	});
 
 	const handleStartExtraction = () => {
+		if (configMode === 'range' && minNumber >= maxNumber) {
+			alert('Il numero massimo deve essere maggiore del numero minimo');
+			return;
+		}
+
 		if (
-			totalSlices < 1 ||
+			effectiveSliceCount < 1 ||
 			totalExtractions < 1 ||
-			totalExtractions > totalSlices
+			totalExtractions > effectiveSliceCount
 		) {
 			alert('Configurazione non valida');
 			return;
 		}
 
 		// Inizializza la lista di numeri disponibili
-		const numbers = Array.from({ length: totalSlices }, (_, i) => i + 1);
+		const startNumber = configMode === 'slices' ? 1 : minNumber;
+		const numbers = generateSequentialNumbers(
+			effectiveSliceCount,
+			startNumber
+		);
 		setAvailableNumbers(numbers);
 		setExtractedNumbers([]);
 		setPendingRemoval(null);
@@ -112,22 +133,98 @@ function App() {
 						<div className='space-y-6 mt-5'>
 							<div>
 								<label className='block text-sm font-semibold text-white mb-2'>
-									Numero di spicchi
+									Modalità
 								</label>
-								<input
-									type='number'
-									min='1'
-									max='1000'
-									value={totalSlices}
-									onChange={(e) =>
-										setTotalSlices(
-											parseInt(e.target.value) || 0
-										)
-									}
-									className='w-full px-4 py-2 border border-primary rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent'
-									placeholder='Es: 100'
-								/>
+								<div className='flex gap-2'>
+									<button
+										type='button'
+										onClick={() =>
+											setConfigMode('slices')
+										}
+										className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+											configMode === 'slices'
+												? 'bg-secondary text-white'
+												: 'bg-white/10 text-white/70 hover:bg-white/20'
+										}`}
+									>
+										Numero spicchi
+									</button>
+									<button
+										type='button'
+										onClick={() => setConfigMode('range')}
+										className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+											configMode === 'range'
+												? 'bg-secondary text-white'
+												: 'bg-white/10 text-white/70 hover:bg-white/20'
+										}`}
+									>
+										Range min-max
+									</button>
+								</div>
 							</div>
+
+							{configMode === 'slices' ? (
+								<div>
+									<label className='block text-sm font-semibold text-white mb-2'>
+										Numero di spicchi
+									</label>
+									<input
+										type='number'
+										min='1'
+										max='1000'
+										value={totalSlices}
+										onChange={(e) =>
+											setTotalSlices(
+												parseInt(e.target.value) || 0
+											)
+										}
+										className='w-full px-4 py-2 border border-primary rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent'
+										placeholder='Es: 100'
+									/>
+								</div>
+							) : (
+								<div>
+									<label className='block text-sm font-semibold text-white mb-2'>
+										Range numeri
+									</label>
+									<div className='flex gap-3'>
+										<div className='flex-1'>
+											<input
+												type='number'
+												value={minNumber}
+												onChange={(e) =>
+													setMinNumber(
+														parseInt(
+															e.target.value
+														) || 0
+													)
+												}
+												className='w-full px-4 py-2 border border-primary rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent'
+												placeholder='Min'
+											/>
+										</div>
+										<div className='flex-1'>
+											<input
+												type='number'
+												value={maxNumber}
+												onChange={(e) =>
+													setMaxNumber(
+														parseInt(
+															e.target.value
+														) || 0
+													)
+												}
+												className='w-full px-4 py-2 border border-primary rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent'
+												placeholder='Max'
+											/>
+										</div>
+									</div>
+									<p className='text-xs text-white/60 mt-1'>
+										Spicchi generati:{' '}
+										{effectiveSliceCount}
+									</p>
+								</div>
+							)}
 
 							<div>
 								<label className='block text-sm font-semibold text-white mb-2'>
@@ -136,7 +233,7 @@ function App() {
 								<input
 									type='number'
 									min='1'
-									max={totalSlices}
+									max={effectiveSliceCount}
 									value={totalExtractions}
 									onChange={(e) =>
 										setTotalExtractions(
@@ -147,7 +244,7 @@ function App() {
 									placeholder='Es: 10'
 								/>
 								<p className='text-xs text-white/60 mt-1'>
-									Max: {totalSlices}
+									Max: {effectiveSliceCount}
 								</p>
 							</div>
 
